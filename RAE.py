@@ -6,13 +6,31 @@ class RAETree:
 	"""
 	Autoencoder tree composed of RAETreeNodes.
 	"""
-
-	def __init__(self, S):
+	
+	def __init__(self, params, S):
 		"""
 		Build the tree!
 		"""
-		print "test"
+		sentenceTree = []
+		for i in range(0,len(S)):
+			sentenceTree.append(RAETreeNode(params,S[i]))
 
+		while (len(sentenceTree) > 1):
+			lowestError = float("inf")
+			lowestErrorCandidate = None
+			lowestErrorIndex = 0
+			for i in range(0,len(sentenceTree)-1):
+				candidate = RAETreeNode(params,sentenceTree[i],sentenceTree[i+1])
+				if (lowestError > candidate.reconError):
+					lowestError = candidate.reconError
+					lowestErrorCandidate = candidate
+					lowestErrorIndex = i
+
+			sentenceTree[i] = lowestErrorCandidate
+			sentenceTree.pop(i+1)
+
+		#done, we only have one element that is the root node of the tree
+		self.root = sentenceTree[0]
 
 class RAETreeNode:
 	"""

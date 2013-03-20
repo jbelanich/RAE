@@ -36,3 +36,12 @@ def genRandWord():
 	Generates random words.
 	"""
 	return random.rand(100,1)
+
+def genRandSentence(length):
+	"""
+	Generates length number of words in a list
+	"""
+	sentence = []
+	for i in range(0,length):
+		sentence.append(genRandWord())
+	return sentence
