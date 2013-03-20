@@ -6,7 +6,7 @@ class RAETree:
 	"""
 	Autoencoder tree composed of RAETreeNodes.
 	"""
-	
+
 	def __init__(self, params, S):
 		"""
 		Build the tree!
@@ -62,6 +62,7 @@ class RAETreeNode:
 
 		#construct node
 		self.p = tanh(W1.dot(concatenate((self.c1.p,self.c2.p))) + b1)
+		self.p = self.p / sum(self.p)
 		reconstruction = W2.dot(self.p) + b2
 		c1Prime = reconstruction[0:100]
 		c2Prime = reconstruction[100:200]

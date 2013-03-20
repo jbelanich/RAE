@@ -1,3 +1,11 @@
+A semi-supervised recursive autoencoder implementation based off of the paper:
+http://www.socher.org/uploads/Main/SocherPenningtonHuangNgManning_EMNLP2011.pdf.
+
+Work in progress.
+
+
+TODO:
+
 --- Word Database ---
 
 First I need something that represents a "vocabulary", some set of words
