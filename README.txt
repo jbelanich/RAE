@@ -3,6 +3,8 @@ http://www.socher.org/uploads/Main/SocherPenningtonHuangNgManning_EMNLP2011.pdf.
 
 Work in progress.
 
+Requires: numpy, scipy
+
 
 TODO:
 
