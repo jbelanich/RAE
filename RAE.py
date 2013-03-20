@@ -69,3 +69,7 @@ class RAETreeNode:
 		self.reconError = util.reconError(self.c1.p,self.c2.p,c1Prime,c2Prime)
 		self.c = util.softmax(Wlabel.dot(self.p))
 
+
+	def isLeaf(self):
+		return (self.c1 == None) or (self.c2 == None)
+
