@@ -7,7 +7,10 @@ class RAETree:
 	Autoencoder tree composed of RAETreeNodes.
 	"""
 
-	def __init__(self):
+	def __init__(self, S):
+		"""
+		Build the tree!
+		"""
 		print "test"
 
 
@@ -43,7 +46,7 @@ class RAETreeNode:
 		self.p = tanh(W1.dot(concatenate((self.c1.p,self.c2.p))) + b1)
 		reconstruction = W2.dot(self.p) + b2
 		c1Prime = reconstruction[0:100]
-		c2Prime = reconstruction[101:200]
+		c2Prime = reconstruction[100:200]
 		self.reconError = util.reconError(self.c1.p,self.c2.p,c1Prime,c2Prime)
 		self.c = util.softmax(Wlabel.dot(self.p))
 

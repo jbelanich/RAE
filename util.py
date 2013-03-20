@@ -12,7 +12,12 @@ def reconError(c1,c2,c1Prime,c2Prime):
 	"""
 	Computes the reconstruction error.
 	"""
-	return 0
+	diff = concatenate((c1,c2)) - concatenate((c1Prime,c2Prime))
+	return .5 * sqrt(
+		sum(
+			power(diff,2)
+			)
+		)
 
 def genRandParams():
 	"""
