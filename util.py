@@ -24,18 +24,18 @@ def genRandParams():
 	Returns random (W1,b1,W2,b2,Wlabel)
 	"""
 	return (
-		random.rand(100,200),
-		random.rand(100,1),
-		random.rand(200,100),
-		random.rand(200,1),
-		random.rand(2,100)
+		random.randn(100,200),
+		random.randn(100,1),
+		random.randn(200,100),
+		random.randn(200,1),
+		random.randn(2,100)
 		)
 
 def genRandWord():
 	"""
 	Generates random words.
 	"""
-	return random.rand(100,1)
+	return random.randn(100,1)
 
 def genRandSentence(length):
 	"""
