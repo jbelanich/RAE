@@ -12,4 +12,7 @@ class Word(models.Model):
 	def getVectorRep(self):
 		return base64.decodestring(self._vectorRep)
 
+	def __unicode__(self):
+		return unicode(self.word)
+
 	vectorRep = property(getVectorRep,setVectorRep)

@@ -1,4 +1,6 @@
 import os
+import base64
+import string
 
 from models import *
 from RAE.util import *
@@ -20,7 +22,36 @@ The dictionary is maintained as a sqlite database.
 
 """
 
-def translate(queryWord):
+def reps2sentence(reps):
+	return string.join(reps2words(reps))
+
+def reps2words(reps):
+	words = []
+	for rep in reps:
+		words.append(rep2word(rep))
+
+	return words
+
+def sentence2reps(sentence):
+	return words2reps(sentence.split())
+
+def words2reps(words):
+	reps = []
+	for word in words:
+		reps.append(word2rep(word))
+
+	return reps
+
+def rep2word(queryVector):
+	try:
+		wordResult = Word.objects.get(_vectorRep=base64.encodestring(
+			queryVector.tostring()))
+	except Word.DoesNotExist:
+		return None
+
+	return wordResult.word
+
+def word2rep(queryWord):
 	"""
 	Return the vector representation of a word.  If the
 	word doesn't exist in the dictionary, a new representation

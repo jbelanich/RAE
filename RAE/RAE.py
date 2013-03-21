@@ -1,4 +1,5 @@
 from numpy import *
+from dictionary import dictionary
 
 import util
 
