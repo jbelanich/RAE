@@ -8,10 +8,14 @@ class RAETree:
 	Autoencoder tree composed of RAETreeNodes.
 	"""
 
-	def __init__(self, params, S):
+	def __unicode__(self):
+		return self.root.__unicode__()
+
+	def __init__(self, params, sentence):
 		"""
 		Build the tree!
 		"""
+		S = dictionary.sentence2reps(sentence)
 		sentenceTree = []
 		for i in range(0,len(S)):
 			sentenceTree.append(RAETreeNode(params,S[i]))
@@ -27,8 +31,7 @@ class RAETree:
 					lowestErrorCandidate = candidate
 					lowestErrorIndex = i
 
-			sentenceTree[i] = lowestErrorCandidate
-			sentenceTree.pop(i+1)
+			sentenceTree[lowestErrorIndex] = lowestErrorCandidate
 
 		#done, we only have one element that is the root node of the tree
 		self.root = sentenceTree[0]
@@ -55,6 +58,8 @@ class RAETreeNode:
 			self.buildRepresentation()
 		else:
 			self.p = args[0]
+			self.c1 = None
+			self.c2 = None
 			self.reconError = 0
 
 	def buildRepresentation(self):
@@ -73,4 +78,11 @@ class RAETreeNode:
 
 	def isLeaf(self):
 		return (self.c1 == None) or (self.c2 == None)
+
+	def __unicode__(self):
+		if self.isLeaf():
+			return unicode(dictionary.rep2word(self.p))
+		else:
+			return self.c1.__unicode__() + ' ' + self.c2.__unicode__()
+
 

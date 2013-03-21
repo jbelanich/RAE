@@ -63,7 +63,7 @@ def word2rep(queryWord):
 		wordResult = Word(word=queryWord,vectorRep=genRandWord().tostring())
 		wordResult.save()
 
-	return fromstring(wordResult.vectorRep)
+	return reshape(fromstring(wordResult.vectorRep), (100,1))
 
 
 
