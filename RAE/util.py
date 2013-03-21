@@ -45,3 +45,10 @@ def genRandSentence(length):
 	for i in range(0,length):
 		sentence.append(genRandWord())
 	return sentence
+
+def isingle(thing):
+	"""
+	Iterator that iterates the single element provided.
+	Useful for chaining.
+	"""
+	yield thing

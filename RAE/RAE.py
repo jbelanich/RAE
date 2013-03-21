@@ -1,5 +1,6 @@
 from numpy import *
 from dictionary import dictionary
+from itertools import *
 
 import util
 
@@ -10,6 +11,9 @@ class RAETree:
 
 	def __unicode__(self):
 		return self.root.__unicode__()
+
+	def __iter__(self):
+		return iter(self.root)
 
 	def __init__(self, params, sentence):
 		"""
@@ -32,6 +36,7 @@ class RAETree:
 					lowestErrorIndex = i
 
 			sentenceTree[lowestErrorIndex] = lowestErrorCandidate
+			sentenceTree.pop(lowestErrorIndex+1)
 
 		#done, we only have one element that is the root node of the tree
 		self.root = sentenceTree[0]
@@ -61,6 +66,12 @@ class RAETreeNode:
 			self.c1 = None
 			self.c2 = None
 			self.reconError = 0
+
+	def __iter__(self):
+		if not self.isLeaf():
+			return chain(util.isingle(self), iter(self.c1), iter(self.c2))
+		else:
+			return util.isingle(self)
 
 	def buildRepresentation(self):
 		#unpack parameters
