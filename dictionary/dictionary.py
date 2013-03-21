@@ -3,7 +3,7 @@ import base64
 import string
 
 from models import *
-from RAE.util import *
+from RAE.genutil import *
 
 """
 

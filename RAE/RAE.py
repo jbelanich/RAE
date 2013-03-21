@@ -1,8 +1,14 @@
 from numpy import *
 from dictionary import dictionary
+from genutil import *
 from itertools import *
 
-import util
+import mathutil as util
+
+def genRandTree():
+	params = genRandParams()
+	sentence = 'testing on some random sentence'
+	return RAETree(params, sentence)
 
 class RAETree:
 	"""
@@ -13,6 +19,9 @@ class RAETree:
 		return self.root.__unicode__()
 
 	def __iter__(self):
+		"""
+		Iterate over the tree's nodes depth first.
+		"""
 		return iter(self.root)
 
 	def __init__(self, params, sentence):
@@ -40,6 +49,19 @@ class RAETree:
 
 		#done, we only have one element that is the root node of the tree
 		self.root = sentenceTree[0]
+
+	def reconError(self):
+		"""
+		Reconstruction error is the sum of the reconstruction errors
+		of each individual node.
+		"""
+		sum = 0
+		for node in self:
+			sum += node.reconError
+		return sum
+
+	def numLeaves(self):
+		return self.root.numLeaves()
 
 class RAETreeNode:
 	"""
@@ -83,12 +105,32 @@ class RAETreeNode:
 		reconstruction = W2.dot(self.p) + b2
 		c1Prime = reconstruction[0:100]
 		c2Prime = reconstruction[100:200]
-		self.reconError = util.reconError(self.c1.p,self.c2.p,c1Prime,c2Prime)
+		self.reconError = util.weightedReconError(
+			self.c1.p,
+			self.c2.p,
+			c1Prime,
+			c2Prime,
+			self.c1.numLeaves()+1,
+			self.c2.numLeaves()+1)
 		self.c = util.softmax(Wlabel.dot(self.p))
 
 
 	def isLeaf(self):
 		return (self.c1 == None) or (self.c2 == None)
+
+	def numLeaves(self):
+		if self.isLeaf():
+			return 0
+		else:
+			if self.c1.isLeaf() and self.c2.isLeaf():
+				return 2
+			elif self.c1.isLeaf() and not self.c2.isLeaf():
+				return 1 + self.c2.numLeaves()
+			elif not self.c1.isLeaf() and self.c2.isLeaf():
+				return 1 + self.c1.numLeaves()
+			else:
+				return self.c1.numLeaves() + self.c2.numLeaves()
+
 
 	def __unicode__(self):
 		if self.isLeaf():
