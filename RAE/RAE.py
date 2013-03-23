@@ -25,6 +25,16 @@ class RAETree:
 		return iter(self.root)
 
 	def __init__(self, params, sentence):
+		self.buildTree(params,sentence)
+		self.backprop(params,sentence)
+
+	def backprop(self, params, sentence):
+		"""
+		Compute the delta values for the gradient.
+		"""
+		return 0
+
+	def buildTree(self, params, sentence):
 		"""
 		Build the tree!
 		"""
