@@ -32,6 +32,7 @@ class RAETree:
 		"""
 		Compute the delta values for the gradient.
 		"""
+		self.root.backprop(params,sentence)
 		return 0
 
 	def buildTree(self, params, sentence):
@@ -59,6 +60,7 @@ class RAETree:
 
 		#done, we only have one element that is the root node of the tree
 		self.root = sentenceTree[0]
+		self.root.parent = None
 
 	def reconError(self):
 		"""
@@ -92,6 +94,8 @@ class RAETreeNode:
 
 		if (len(args) > 1):
 			(self.c1,self.c2) = args
+			self.c1.parent = self
+			self.c2.parent = self
 			self.buildRepresentation()
 		else:
 			self.p = args[0]
@@ -104,6 +108,12 @@ class RAETreeNode:
 			return chain(util.isingle(self), iter(self.c1), iter(self.c2))
 		else:
 			return util.isingle(self)
+
+	def backprop(self, params, sentence):
+		"""
+		Calculate delta values depending place in tree.
+		"""
+		return 0
 
 	def buildRepresentation(self):
 		#unpack parameters
@@ -123,6 +133,9 @@ class RAETreeNode:
 			self.c1.numLeaves()+1,
 			self.c2.numLeaves()+1)
 		self.c = util.softmax(Wlabel.dot(self.p))
+
+	def isRoot(self):
+		return (self.parent == None)
 
 
 	def isLeaf(self):
