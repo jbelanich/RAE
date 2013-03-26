@@ -25,8 +25,9 @@ class RAETree:
 		return iter(self.root)
 
 	def __init__(self, params, sentence):
+		self.params = params
+		self.sentence = sentence
 		self.buildTree(params,sentence)
-		self.backprop(params,sentence)
 
 	def backprop(self, params, sentence):
 		"""
@@ -72,7 +73,26 @@ class RAETree:
 		sum = 0
 		for node in self:
 			sum += node.reconError
-		return sum
+		return sum/2
+
+	def dreconError(self):
+		"""
+		Gradient of reconstruction error as calculated by
+		backpropogation.
+		"""
+		dW1Sum = zeros((100,200))
+		db1Sum = zeros((100,1))
+		dW2Sum = zeros((200,100))
+		db2Sum = zeros((200,1))
+		dWlabelSum = zeros((2,100))
+		for node in self:
+			if not node.isLeaf():
+				node.backpropAsRoot(self.params,self.sentence)
+				(dW1,db1,dW2,db2,dWlabel) = node.dreconError(self.params,self.sentence)
+				(dW1Sum,db1Sum,dW2Sum,db2Sum,dWlabelSum) = (dW1Sum+dW1,
+					db1Sum+db1, dW2Sum+dW2, db2Sum+db2, dWlabelSum+dWlabel)
+
+		return (dW1Sum,db1Sum,dW2Sum,db2Sum,dWlabelSum)
 
 	def numLeaves(self):
 		return self.root.numLeaves()
@@ -109,6 +129,22 @@ class RAETreeNode:
 		else:
 			return util.isingle(self)
 
+	def backpropAsRoot(self, params, sentence):
+		"""
+		Calculate delta values depending place in tree,
+		pretending this node is the root and moving on down.
+		"""
+		(W1,b1,W2,b2,Wlabel) = self.params
+		W2top = W2[0:100,:]
+		W2bottom = W2[100:200,:]
+		leftWeight = float(self.c1.numLeaves() + 1)/(self.c1.numLeaves() + self.c2.numLeaves() + 2)
+		rightWeight = float(self.c2.numLeaves() + 1)/(self.c1.numLeaves() + self.c2.numLeaves() + 2)
+
+		self.delta = -util.dtanh(self.a) * (leftWeight*W2top.transpose().dot(self.c1.p - self.c1Prime)+ rightWeight * W2bottom.transpose().dot(self.c2.p - self.c2Prime))
+
+		self.c1.backprop(params,sentence)
+		self.c2.backprop(params,sentence)
+
 	def backprop(self, params, sentence):
 		"""
 		Calculate delta values depending place in tree.
@@ -137,6 +173,36 @@ class RAETreeNode:
 
 		self.c1.backprop(params,sentence)
 		self.c2.backprop(params,sentence)
+
+	def dreconError(self, params, sentence):
+		"""
+		Calcualte the gradient for reconstruction error.
+		Assume that this is not a leaf, and also that backprop
+		has taken place.  Also, assumes that this node is root.
+		"""
+		(W1,b1,W2,b2,Wlabel) = self.params
+
+		dW1 = self.delta.dot(self.c.transpose())
+		db1 = self.delta
+
+		#building dW2 and db2 is more tricky
+		topWeight = float(self.c1.numLeaves() + 1)/(self.c1.numLeaves() + self.c2.numLeaves() + 2)
+		bottomWeight = float(self.c2.numLeaves() + 1)/(self.c1.numLeaves() + self.c2.numLeaves() + 2)
+		dW2top = -topWeight*((self.c1.p - self.c1Prime).dot(self.p.transpose()))
+		dW2bottom = -bottomWeight*((self.c2.p - self.c2Prime).dot(self.p.transpose()))
+		dW2 = concatenate((dW2top,dW2bottom))
+
+		db2 = concatenate((
+			-topWeight*(self.c1.p - self.c1Prime),
+			-bottomWeight*(self.c2.p-self.c2Prime)
+			))
+
+		#temp
+		dWlabel = zeros((2,100))
+
+		return (dW1,db1,dW2,db2,dWlabel)
+
+
 
 	def isLeftChild(self):
 		return self.parent.c1 == self
