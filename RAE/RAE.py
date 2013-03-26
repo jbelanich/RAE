@@ -55,6 +55,8 @@ class RAETree:
 					lowestErrorCandidate = candidate
 					lowestErrorIndex = i
 
+			lowestErrorCandidate.c1.parent = lowestErrorCandidate
+			lowestErrorCandidate.c2.parent = lowestErrorCandidate
 			sentenceTree[lowestErrorIndex] = lowestErrorCandidate
 			sentenceTree.pop(lowestErrorIndex+1)
 
@@ -94,8 +96,6 @@ class RAETreeNode:
 
 		if (len(args) > 1):
 			(self.c1,self.c2) = args
-			self.c1.parent = self
-			self.c2.parent = self
 			self.buildRepresentation()
 		else:
 			self.p = args[0]
@@ -113,30 +113,57 @@ class RAETreeNode:
 		"""
 		Calculate delta values depending place in tree.
 		"""
-		return 0
+
+		#backprop doesn't need to calculate deltas for leaves
+		if self.isLeaf():
+			return
+
+		(W1,b1,W2,b2,Wlabel) = self.params
+		W2top = W2[0:100,:]
+		W2bottom = W2[100:200,:]
+		W1left = W1[:,0:100]
+		W1right = W1[:,100:200]
+		leftWeight = float(self.c1.numLeaves() + 1)/(self.c1.numLeaves() + self.c2.numLeaves() + 2)
+		rightWeight = float(self.c2.numLeaves() + 1)/(self.c1.numLeaves() + self.c2.numLeaves() + 2)
+
+		if self.isRoot():
+			self.delta = -util.dtanh(self.a) * (leftWeight*W2top.transpose().dot(self.c1.p - self.c1Prime)+ rightWeight * W2bottom.transpose().dot(self.c2.p - self.c2Prime))
+		else:
+			if self.isLeftChild():
+				properW = W1left
+			else:
+				properW = W1right
+			self.delta = util.dtanh(self.a) * (properW.dot(self.parent.delta))
+
+		self.c1.backprop(params,sentence)
+		self.c2.backprop(params,sentence)
+
+	def isLeftChild(self):
+		return self.parent.c1 == self
 
 	def buildRepresentation(self):
 		#unpack parameters
 		(W1,b1,W2,b2,Wlabel) = self.params
 
 		#construct node
-		self.p = tanh(W1.dot(concatenate((self.c1.p,self.c2.p))) + b1)
-		self.p = self.p / sum(self.p)
+		self.c = concatenate((self.c1.p,self.c2.p))
+		self.a = W1.dot(self.c) + b1
+		self.p = tanh(self.a)
+		#self.p = self.p / sum(self.p)
 		reconstruction = W2.dot(self.p) + b2
-		c1Prime = reconstruction[0:100]
-		c2Prime = reconstruction[100:200]
+		self.c1Prime = reconstruction[0:100]
+		self.c2Prime = reconstruction[100:200]
 		self.reconError = util.weightedReconError(
 			self.c1.p,
 			self.c2.p,
-			c1Prime,
-			c2Prime,
+			self.c1Prime,
+			self.c2Prime,
 			self.c1.numLeaves()+1,
 			self.c2.numLeaves()+1)
-		self.c = util.softmax(Wlabel.dot(self.p))
+		self.classification = util.softmax(Wlabel.dot(self.p))
 
 	def isRoot(self):
 		return (self.parent == None)
-
 
 	def isLeaf(self):
 		return (self.c1 == None) or (self.c2 == None)
@@ -160,5 +187,3 @@ class RAETreeNode:
 			return unicode(dictionary.rep2word(self.p))
 		else:
 			return self.c1.__unicode__() + ' ' + self.c2.__unicode__()
-
-

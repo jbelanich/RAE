@@ -8,6 +8,9 @@ def softmax(w,t=1.0):
 	unNorm = exp(array(w)/t)
 	return unNorm/sum(unNorm)
 
+def dtanh(x):
+	return 1 - tanh(x)**2
+
 def reconError(c1,c2,c1Prime,c2Prime):
 	"""
 	Computes the reconstruction error.
